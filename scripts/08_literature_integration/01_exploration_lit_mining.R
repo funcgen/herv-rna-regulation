@@ -1,5 +1,5 @@
 # ==============================================================================
-# 01_exploration_lit_mining.R
+# 03_HERV_lncRNA_functional_annotation_and_visualization.R
 # ==============================================================================
 
 # Purpose
@@ -120,44 +120,55 @@ split_aliases <- function(x) {
 # 4. Build alias table from HERV lncRNA table
 # ============================================================
 
-alias_tbl <- pmap_dfr(
-  herv_lncrna %>%
-    dplyr::select(
-      gene_stable_id, gene_name,
-      matched_symbols, matched_synonyms,
-      matched_gene_ids, matched_transcript_ids
-    ),
-  function(gene_stable_id, gene_name, matched_symbols, matched_synonyms, matched_gene_ids, matched_transcript_ids) {
-    
-    tibble(
-      gene_stable_id = gene_stable_id,
-      gene_name = gene_name,
-      alias_type = c(
-        rep("gene_name", length(split_aliases(gene_name))),
-        rep("matched_symbols", length(split_aliases(matched_symbols))),
-        rep("matched_synonyms", length(split_aliases(matched_synonyms))),
-        rep("matched_gene_ids", length(split_aliases(matched_gene_ids))),
-        rep("matched_transcript_ids", length(split_aliases(matched_transcript_ids)))
-      ),
-      alias = c(
-        split_aliases(gene_name),
-        split_aliases(matched_symbols),
-        split_aliases(matched_synonyms),
-        split_aliases(matched_gene_ids),
-        split_aliases(matched_transcript_ids)
-      )
-    )
-  }
-) %>%
+# ============================================================
+# 4. Build alias table from HERV lncRNA table (Vectorized)
+# ============================================================
+
+# ============================================================
+# 4. Build alias table from HERV lncRNA table (Vectorized)
+# ============================================================
+
+alias_tbl <- herv_lncrna %>%
+  dplyr::select(
+    gene_stable_id, 
+    gene_name, 
+    matched_symbols, 
+    matched_synonyms,
+    matched_gene_ids, 
+    matched_transcript_ids
+  ) %>%
+  # 1. Create a safe copy of gene_name to keep in the final table
+  mutate(base_gene_name = gene_name) %>%
+  # 2. Pivot the alias columns into a long format
+  pivot_longer(
+    cols = c(gene_name, matched_symbols, matched_synonyms, matched_gene_ids, matched_transcript_ids),
+    names_to = "alias_type",
+    values_to = "alias_raw"
+  ) %>%
+  # 3. Filter out missing data BEFORE splitting to save processing time
+  filter(
+    !is.na(alias_raw), 
+    alias_raw != "no lncRNAwiki annotation", 
+    alias_raw != ""
+  ) %>%
+  # 4. Split strings containing commas or semicolons into new rows
+  separate_rows(alias_raw, sep = "[,;]") %>%
+  # 5. Clean up whitespace and standardize formatting
   mutate(
-    alias = str_squish(alias),
+    alias = str_squish(alias_raw),
     alias_std = toupper(alias)
   ) %>%
-  filter(!is.na(alias_std), alias_std != "") %>%
+  # 6. Remove any artifacts created by trailing commas/semicolons
+  filter(alias_std != "", alias_std != "NA") %>%
+  # 7. Restore the base gene_name column and finalize structure
+  dplyr::rename(gene_name = base_gene_name) %>%
+  dplyr::select(gene_stable_id, gene_name, alias_type, alias, alias_std) %>%
   distinct()
 
 # Optional QC
+print(alias_tbl)
 alias_tbl %>% count(alias_type)
+
 
 alias_tbl %>%
   filter(gene_name %in% c("UCA1", "LINC01671", "CERNA2")) %>%
@@ -226,7 +237,7 @@ lit_summary_per_gene <- lit_matches_herv %>%
     min_candidates_in_sentence = suppressWarnings(min(n_candidates_in_sentence, na.rm = TRUE)),
     max_candidates_in_sentence = suppressWarnings(max(n_candidates_in_sentence, na.rm = TRUE)),
     
-    evidence_sentences = paste(unique(Evidence_Sentence)[1:min(5, dplyr::n())], collapse = " || "),
+    evidence_sentences = paste(head(unique(Evidence_Sentence), 5), collapse = " || "),
     .groups = "drop"
   ) %>%
   mutate(
@@ -507,12 +518,12 @@ panelA_df <- herv_simplified %>%
   )
 
 pA <- ggplot(panelA_df, aes(x = evidence_class, y = n, fill = evidence_class)) +
-  geom_col(width = 0.72, color = NA) +
+  geom_col(width = 0.92, color = NA) +
   geom_text(
     aes(label = label),
-    vjust = -0.35,
-    size = 3.8,
-    lineheight = 0.95
+    vjust = -0.25,
+    size = 5.8,
+    lineheight = 1
   ) +
   scale_fill_manual(values = c(
     "No annotation"    = "#D9D9D9",
@@ -527,14 +538,14 @@ pA <- ggplot(panelA_df, aes(x = evidence_class, y = n, fill = evidence_class)) +
   ) +
   labs(
     x = NULL,
-    y = "Number of HERV-associated lncRNAs"
+    y = "# HERV-associated lncRNAs"
   ) +
-  theme_classic(base_size = 13) +
+  theme_classic(base_size = 19) +
   theme(
     legend.position = "none",
-    axis.title = element_text(size = 13),
-    axis.text.x = element_text(size = 11, angle = 20, hjust = 1),
-    axis.text.y = element_text(size = 11),
+    axis.title = element_text(size = 19),
+    axis.text.x = element_text(size = 17, angle = 20, hjust = 1),
+    axis.text.y = element_text(size = 17),
     plot.margin = margin(8, 8, 8, 8)
   )
 
@@ -615,14 +626,14 @@ panelB_df <- panelB_long %>%
   )
 
 pB <- ggplot(panelB_df, aes(x = n_genes, y = fct_reorder(category, n_genes))) +
-  geom_col(width = 0.72, fill = "#4C78A8") +
+  geom_col(width = 0.92, fill = "#4C78A8") +
   geom_text(
     aes(
       label = label,
       hjust = ifelse(n_genes > 50, 1.05, -0.1)  # inside if large, outside if small
     ),
     color = ifelse(panelB_df$n_genes > 50, "white", "black"),
-    size = 3.8
+    size = 6.8
   ) +
   scale_x_continuous(
     limits = c(0, max(panelB_df$n_genes) * 1.2),
@@ -633,10 +644,10 @@ pB <- ggplot(panelB_df, aes(x = n_genes, y = fct_reorder(category, n_genes))) +
     x = "Number of annotated HERV-associated lncRNAs",
     y = NULL
   ) +
-  theme_classic(base_size = 13) +
+  theme_classic(base_size = 19) +
   theme(
-    axis.title = element_text(size = 13),
-    axis.text = element_text(size = 11)
+    axis.title = element_text(size = 19),
+    axis.text = element_text(size = 17)
   )
 
 
@@ -669,14 +680,21 @@ panelC_df <- herv_simplified %>%
   )
 
 pC <- ggplot(panelC_df, aes(x = herv_contribution, y = frac_annotated, group = 1)) +
-  geom_line(linewidth = 0.8, color = "black") +
-  geom_point(size = 3.5, color = "#4C78A8") +
+  geom_line(linewidth = 1.4, color = "black") +
+  geom_point(size = 5.5, color = "#4C78A8") +
   geom_point(
     data = panelC_df %>% filter(herv_contribution == "predominant"),
-    size = 4.5,
+    size = 6.5,
     color = "#C21F1F"
   ) +
-  geom_text(aes(label = label), vjust = -0.8, size = 3.5, lineheight = 0.95) +
+  # geom_text(aes(label = label), vjust = -0.8, size = 5.5, lineheight = 1) +
+  geom_label(
+    aes(label = label),
+    vjust = -0.5,
+    size = 5.5,
+    fill = scales::alpha("white", 0.6),
+    label.size = 0
+  ) +
   scale_x_discrete(
     labels = c(
       "minor" = "<10%",
@@ -687,17 +705,17 @@ pC <- ggplot(panelC_df, aes(x = herv_contribution, y = frac_annotated, group = 1
   ) +
   scale_y_continuous(
     labels = percent_format(accuracy = 1),
-    limits = c(0, max(panelC_df$frac_annotated) * 1.25),
+    limits = c(0, max(panelC_df$frac_annotated) * 1.10),
     expand = expansion(mult = c(0, 0.02))
   ) +
   labs(
     x = "HERV contribution to lncRNA gene body",
     y = "Annotated lncRNAs"
   ) +
-  theme_classic(base_size = 13) +
+  theme_classic(base_size = 19) +
   theme(
-    axis.title = element_text(size = 13),
-    axis.text = element_text(size = 11),
+    axis.title = element_text(size = 19),
+    axis.text = element_text(size = 17),
     plot.margin = margin(8, 8, 8, 8)
   )
 
@@ -725,8 +743,8 @@ p_multi <- plot_grid(
   pC + plot_margin,
   labels = c("A", "B", "C"),
   ncol = 3,
-  label_size = 11,
-  label_fontface = "bold"
+  label_size = 32,
+  label_fontface = "plain"
 )
 p_multi
 
