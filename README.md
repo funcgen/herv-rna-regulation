@@ -145,7 +145,7 @@ If you use this code, please cite:
 
 > Montserrat-Ayuso et al., Human endogenous retroviruses shape the RNA regulatory landscape of the human genome (manuscript in preparation)
 
-and the corresponding Zenodo dataset: 
+and the corresponding Zenodo dataset: [https://doi.org/10.5281/zenodo.19661035](https://doi.org/10.5281/zenodo.19661035)
 
 ## 🚀 Future directions
 
