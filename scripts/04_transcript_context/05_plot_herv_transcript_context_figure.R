@@ -75,12 +75,17 @@ if (isTRUE(CFG$use_precomputed)) {
   atlas_only_protein_coding <- atlas_ov_same_strand %>% filter(overlap_protein_coding)
   
   panelA_clean <- tibble(
-    category = c("lncRNA intron", "lncRNA exon", "PC intron", "PC exon"),
+    category = c(
+      "lncRNA intronic overlap",
+      "lncRNA exonic overlap",
+      "Protein-coding intronic overlap",
+      "Protein-coding exonic overlap"
+    ),
     n = c(
-      sum(has_feature(atlas_only_lncrna$feature_overlap, "intron"), na.rm = TRUE),
-      sum(has_feature(atlas_only_lncrna$feature_overlap, "exon"), na.rm = TRUE),
-      sum(has_feature(atlas_only_protein_coding$feature_overlap, "intron"), na.rm = TRUE),
-      sum(has_feature(atlas_only_protein_coding$feature_overlap, "exon"), na.rm = TRUE)
+      sum(panelA_df$is_intronic_lncrna & panelA_df$overlap_lncrna, na.rm = TRUE),
+      sum(panelA_df$is_exonic_lncrna   & panelA_df$overlap_lncrna, na.rm = TRUE),
+      sum(panelA_df$is_intronic_pc     & panelA_df$overlap_protein_coding, na.rm = TRUE),
+      sum(panelA_df$is_exonic_pc       & panelA_df$overlap_protein_coding, na.rm = TRUE)
     )
   ) %>%
     mutate(percent = n / nrow(atlas$derived))
@@ -132,32 +137,70 @@ pB <- ggplot(panelB_df, aes(x = gene_type_label, y = percent, fill = exon_positi
 # Panel C
 panelC_summary <- panelC_summary %>%
   mutate(
+    context = as.character(context),
+    context = recode(
+      context,
+      "CDS/UTR not defined" = "Not defined"
+    )
+  ) %>%
+  complete(
+    context = c(
+      "3′ UTR embedded",
+      "CDS embedded",
+      "5′ UTR embedded",
+      "Not defined"
+    ),
+    fill = list(n = 0, percent = 0)
+  ) %>%
+  mutate(
     context = factor(
       context,
-      levels = c(
+      levels = rev(c(
         "3′ UTR embedded",
         "CDS embedded",
         "5′ UTR embedded",
-        "CDS/UTR not defined"
-      )
+        "Not defined"
+      ))
     )
   )
 pC <- ggplot(panelC_summary, aes(x = percent, y = fct_rev(context))) +
-  geom_segment(aes(x = 0, xend = percent, yend = context), color = "grey80") +
+  geom_segment(
+    aes(x = 0, xend = percent, y = context, yend = context),
+    color = "grey80",
+    linewidth = 1
+  ) +
   geom_point(aes(fill = context), shape = 21, size = 4.5) +
-  geom_text(aes(label = paste0(n, " (", percent(percent, accuracy = 0.1), ")")),
-            nudge_x = 0.02, hjust = 0) +
-  scale_x_continuous(labels = percent_format(accuracy = 1),
-                     limits = c(0, max(panelC_summary$percent) + 0.2)) +
+  geom_text(
+    aes(label = paste0(n, " (", percent(percent, accuracy = 0.1), ")")),
+    nudge_x = 0.02,
+    hjust = 0,
+    size = 3.8
+  ) +
+  scale_x_continuous(
+    labels = percent_format(accuracy = 1),
+    limits = c(0, max(panelC_summary$percent) + 0.2),
+    expand = c(0, 0)
+  ) +
   scale_fill_manual(values = c(
-    "3′ UTR embedded"     = "#4C5C78",
-    "CDS embedded"        = "#A2A9B0",
-    "5′ UTR embedded"     = "#D7DCE2",
-    "CDS/UTR not defined" = "#C9CDD3"
+    "3′ UTR embedded" = "#4C5C78",
+    "CDS embedded"    = "#A2A9B0",
+    "5′ UTR embedded" = "#D7DCE2",
+    "Not defined"     = "#C9CDD3"
   )) +
-  labs(x = "Fraction of terminal-exon conserved domains", y = NULL) +
+  labs(
+    x = "Fraction of terminal-exon conserved domains",
+    y = NULL
+  ) +
   theme_pub(base_size = 14) +
-  theme(legend.position = "none")
+  theme(
+    legend.position = "none",
+    axis.line.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.title.x = element_text(margin = margin(t = 1))
+  )
+
+
+
 
 # Panel D
 panelD_counts <- panelD_counts %>%
@@ -187,24 +230,40 @@ pD <- ggplot(panelD_counts, aes(x = domain_class, y = n, fill = gene_class)) +
 # ------------------------------------------------------------------------------
 # Combine figure
 # ------------------------------------------------------------------------------
-final_plot <- (pA | pB) / (pC | pD)
+panel_margin <- theme(
+  plot.margin = margin(10, 10, 10, 10)
+)
+
+pA <- pA + panel_margin
+pB <- pB + panel_margin
+pC <- pC + panel_margin
+pD <- pD + panel_margin
+
+p_multi <- plot_grid(
+  pA, pB, pC, pD,
+  labels = c("A", "B", "C", "D"),
+  ncol = 2,
+  label_size = 14,
+  label_fontface = "bold"
+)
+
 
 # ------------------------------------------------------------------------------
 # Save outputs
 # ------------------------------------------------------------------------------
 if (isTRUE(CFG$save_plots)) {
   ggsave(file.path(CFG$out_dir, "FigureX_herv_transcript_overlap.pdf"),
-         final_plot, width = 14, height = 10)
+         p_multi, width = 16, height = 12)
   ggsave(file.path(CFG$out_dir, "FigureX_herv_transcript_overlap.png"),
-         final_plot, width = 14, height = 10, dpi = 300)
+         p_multi, width = 16, height = 12)
 }
 
 # ------------------------------------------------------------------------------
 # Save tables (useful for debugging/reproducibility)
 # ------------------------------------------------------------------------------
-write_tsv(panelA_clean, file.path(CFG$out_dir, "panelA_global_overlap_context.tsv"))
+# write_tsv(panelA_clean, file.path(CFG$out_dir, "panelA_global_overlap_context.tsv"))
 write_tsv(panelB_df, file.path(CFG$out_dir, "panelB_terminal_vs_nonterminal_by_gene_type.tsv"))
 write_tsv(panelC_summary, file.path(CFG$out_dir, "panelC_terminal_exon_context_in_protein_coding.tsv"))
 write_tsv(panelD_counts, file.path(CFG$out_dir, "panelD_domain_composition_terminal_exons.tsv"))
 
-print(final_plot)
+print(p_multi)

@@ -14,7 +14,7 @@
 #   5. What fraction of overlaps occur in exons vs introns?
 #
 # Inputs
-#   - ../../../data/internal_integrated.with_hervs_id.v2.tsv
+#   - ../../../data/internal_integrated.with_herv_id.tsv
 #
 # Outputs
 #   Written to:
@@ -60,6 +60,46 @@ suppressPackageStartupMessages({
 source("utils_transcript_context.R")
 # This script assumes it is run from its own directory so that source() works.
 
+is_feature_for_gene <- function(feature_per_gene, gene_id, feature) {
+  if (is.na(feature_per_gene) || is.na(gene_id)) return(FALSE)
+  
+  entries <- stringr::str_split(feature_per_gene, ";")[[1]]
+  
+  any(stringr::str_detect(
+    entries,
+    paste0("^", stringr::fixed(gene_id), ".*:.*", feature)
+  ))
+}
+
+add_gene_aware_feature_flags <- function(df, target = c("lncRNA", "protein_coding")) {
+  target <- match.arg(target)
+  
+  df %>%
+    rowwise() %>%
+    mutate(
+      extracted_genes_tmp = list(extract_overlapping_genes(
+        closest_gene_same_strand_name,
+        target = target
+      )),
+      
+      is_exonic_target = any(sapply(
+        extracted_genes_tmp$gene_stable_id,
+        function(gene_id) {
+          is_feature_for_gene(feature_overlap_per_gene_same_strand, gene_id, "exon")
+        }
+      )),
+      
+      is_intronic_target = any(sapply(
+        extracted_genes_tmp$gene_stable_id,
+        function(gene_id) {
+          is_feature_for_gene(feature_overlap_per_gene_same_strand, gene_id, "intron")
+        }
+      ))
+    ) %>%
+    ungroup() %>%
+    select(-extracted_genes_tmp)
+}
+
 # ------------------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------------------
@@ -89,15 +129,24 @@ atlas_ov_same_strand <- add_overlap_flags(atlas$derived)
 # ------------------------------------------------------------------------------
 # 2) Define main subsets used downstream
 # ------------------------------------------------------------------------------
-# HERVs overlapping lncRNAs on the same strand
-atlas_only_lncrna <- atlas_ov_same_strand %>% filter(overlap_lncrna)
+atlas_only_lncrna <- atlas_ov_same_strand %>%
+  filter(overlap_lncrna) %>%
+  add_gene_aware_feature_flags(target = "lncRNA") %>%
+  rename(
+    is_exonic_lncrna = is_exonic_target,
+    is_intronic_lncrna = is_intronic_target
+  )
 
-# HERVs overlapping protein-coding genes on the same strand
-atlas_only_protein_coding <- atlas_ov_same_strand %>% filter(overlap_protein_coding)
+atlas_only_protein_coding <- atlas_ov_same_strand %>%
+  filter(overlap_protein_coding) %>%
+  add_gene_aware_feature_flags(target = "protein_coding") %>%
+  rename(
+    is_exonic_protein_coding = is_exonic_target,
+    is_intronic_protein_coding = is_intronic_target
+  )
 
-# HERVs overlapping lncRNAs specifically at exonic positions
 atlas_lncrna_exonic <- atlas_only_lncrna %>%
-  filter(has_feature(feature_overlap, "exon"))
+  filter(is_exonic_lncrna)
 
 # ------------------------------------------------------------------------------
 # 3) Print high-level overlap prevalence
@@ -193,8 +242,23 @@ write_tsv(
 # 7) Summarize exon/intron overlap composition
 # ------------------------------------------------------------------------------
 # These small summary tables are useful both for QC and for downstream figures.
-pc_feature_summary  <- summarise_feature_overlap(atlas_only_protein_coding)
-lnc_feature_summary <- summarise_feature_overlap(atlas_only_lncrna)
+pc_feature_summary <- tibble(
+  feature = c("exon", "intron"),
+  n = c(
+    sum(atlas_only_protein_coding$is_exonic_protein_coding, na.rm = TRUE),
+    sum(atlas_only_protein_coding$is_intronic_protein_coding, na.rm = TRUE)
+  )
+) %>%
+  mutate(percent = 100 * n / nrow(atlas_only_protein_coding))
+
+lnc_feature_summary <- tibble(
+  feature = c("exon", "intron"),
+  n = c(
+    sum(atlas_only_lncrna$is_exonic_lncrna, na.rm = TRUE),
+    sum(atlas_only_lncrna$is_intronic_lncrna, na.rm = TRUE)
+  )
+) %>%
+  mutate(percent = 100 * n / nrow(atlas_only_lncrna))
 
 write_tsv(
   pc_feature_summary,
@@ -263,8 +327,60 @@ message("Number of unique protein-coding genes overlapped: ", nrow(pc_gene_overl
 # 10) Optional console summaries for QC
 # ------------------------------------------------------------------------------
 # Print raw feature_overlap distributions
+message("Raw/global protein-coding feature_overlap distribution:")
 print(table(atlas_only_protein_coding$feature_overlap, useNA = "ifany"))
 print(pc_feature_summary)
 
+message("Raw/global lncRNA feature_overlap distribution:")
 print(table(atlas_only_lncrna$feature_overlap, useNA = "ifany"))
 print(lnc_feature_summary)
+
+
+total_herv <- nrow(atlas$derived)
+
+pc_feature_summary <- pc_feature_summary %>%
+  mutate(percent_global = 100 * n / total_herv)
+
+lnc_feature_summary <- lnc_feature_summary %>%
+  mutate(percent_global = 100 * n / total_herv)
+
+
+print(pc_feature_summary)
+print(lnc_feature_summary)
+
+
+# ------------------------------
+# GLOBAL COUNTS (paper-ready)
+# ------------------------------
+
+n_lncrna_total <- sum(atlas_ov_same_strand$overlap_lncrna, na.rm = TRUE)
+n_pc_total     <- sum(atlas_ov_same_strand$overlap_protein_coding, na.rm = TRUE)
+
+n_lncrna_exon  <- sum(atlas_only_lncrna$is_exonic_lncrna, na.rm = TRUE)
+n_lncrna_intron<- sum(atlas_only_lncrna$is_intronic_lncrna, na.rm = TRUE)
+
+n_pc_exon      <- sum(atlas_only_protein_coding$is_exonic_protein_coding, na.rm = TRUE)
+n_pc_intron    <- sum(atlas_only_protein_coding$is_intronic_protein_coding, na.rm = TRUE)
+
+
+summary_global <- tibble(
+  category = c(
+    "lncRNA_total",
+    "protein_coding_total",
+    "lncRNA_exon",
+    "lncRNA_intron",
+    "protein_coding_exon",
+    "protein_coding_intron"
+  ),
+  n = c(
+    n_lncrna_total,
+    n_pc_total,
+    n_lncrna_exon,
+    n_lncrna_intron,
+    n_pc_exon,
+    n_pc_intron
+  )
+) %>%
+  mutate(percent_global = 100 * n / total_herv)
+
+print(summary_global)
