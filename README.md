@@ -150,3 +150,6 @@ and the corresponding Zenodo dataset: [https://doi.org/10.5281/zenodo.19661035](
 ## 🚀 Future directions
 
 This repository is part of HERVarium ([https://hervarium.cnag.eu/](https://hervarium.cnag.eu/)), an integrative framework for exploring HERV structure and function across multiple regulatory layers.
+
+## 💰 Funding 
+This publication and all its results are supported by the AGAUR-FI predoctoral grant program (2025 FI-1 00642) Joan Oró, from the Secretariat for Universities and Research of the Department of Research and Universities of the Government of Catalonia, and by the European Social Fund Plus.
