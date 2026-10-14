@@ -1,0 +1,163 @@
+# Scientific parameters. Single source of truth.
+# No analysis script may hard-code any value that appears here.
+# Values are those established by the forensic audit as historically used.
+
+sources:
+  # Zenodo records. NOTE the LTR record: the manuscript cites two DOIs for the
+  # same concept record; 19593457 is the version that actually contains
+  # HERV_ltr.bed and is therefore the canonical dependency (decision D015).
+  herv_domain_release:
+    concept_doi: "10.5281/zenodo.16318927"
+    version_doi: "10.5281/zenodo.17662456"
+    record_id: 17662456
+    published: "2025-12-01"
+  herv_ltr_release:
+    concept_doi: "10.5281/zenodo.17602210"
+    version_doi: "10.5281/zenodo.19593457"
+    record_id: 19593457
+    published: "2026-04-15"
+    superseded_version_cited_in_reference_83: "10.5281/zenodo.18554805"
+  study_release:
+    concept_doi: "10.5281/zenodo.19661035"
+    version_doi: "10.5281/zenodo.19661036"
+    record_id: 19661036
+    published: "2026-04-20"
+  gencode_release: 48
+
+herv_loci:
+  # Extension of internal regions to proximal same-subfamily LTRs.
+  ltr_extension_max_distance_bp: 200
+
+rbp:
+  fimo_primary_pvalue: 1.0e-4
+  # Strict sensitivity threshold. INCLUSIVE: 34 observed calls sit exactly at the
+  # boundary, so "<" and "<=" are NOT interchangeable (decision D016).
+  fimo_strict_pvalue: 1.0e-5
+  fimo_strict_comparison: "less_equal"
+  fimo_max_stored_scores: 1000000
+  fimo_scan_reverse_complement: false     # --norc
+  # Background model for FIMO. fasta-get-markov defaults to order 0, guesses the
+  # alphabet, and COMBINES forward and reverse-complement frequencies; all three
+  # defaults are overridden explicitly because the scan is transcript-oriented.
+  background:
+    markov_order: 1
+    alphabet_flag: "-dna"        # tool default is "guess"; ATtRACT scanning is DNA-coded
+    strand_flag: "-norc"         # do NOT combine reverse-complement frequencies
+    pseudocount: 0.1             # fasta-get-markov default; stated for the record
+    expected_md5: "5cfd4c589b0f1b840e47a5d041b1671f"
+    expected_frequency_lines: 20 # 4 order-0 + 16 order-1
+  # Motif library construction. These filters define the tested RBP universe and
+  # are applied to the ATtRACT database table (ATtRACT_db.txt).
+  motif_library:
+    description: "ATtRACT, Homo sapiens, CisBP-RNA subset"
+    organism_column: "Organism"
+    organism_value: "Homo_sapiens"
+    database_column: "Database"
+    database_value: "C"              # C = CisBP-RNA derived entries
+    matrix_id_column: "Matrix_id"
+    gene_name_column: "Gene_name"
+    matrix_id_null_values: ["N/A", ""]
+    meme_label: "ATtRACT_HSA_CISBP"
+    # Acceptance target (VAL04). The build fails if these are not reproduced.
+    expected_unique_rbps: 93
+    expected_motifs: 151
+  n_dinuc_shuffles: 5
+  dinuc_shuffle_base_seed: 26073000       # historical launcher used base_seed + array index
+  # Explicit replicate -> seed mapping. This is the authority, not the arithmetic
+  # above and not SLURM array numbering: the historical seeds are a scientific
+  # parameter, and a launcher renumbering must never silently reassign them.
+  # The producer cross-checks base_seed + replicate against this table and aborts
+  # on disagreement.
+  dinuc_shuffle_seeds:
+    "01": 26073001
+    "02": 26073002
+    "03": 26073003
+    "04": 26073004
+    "05": 26073005
+  # Serialization of the shuffled FASTAs, recovered from the historical producer.
+  dinuc_shuffle_line_width: 100           # 06_make_one_dinuc_shuffle.py --line-width default
+  dinuc_shuffle_tag_template: "__dinuc_shuf{replicate}"   # appended to the first header field
+  dinuc_shuffle_allowed_bases: "ACGTN"    # N participates in the shuffle; it is not fixed in place
+  # Acceptance targets, established forensically (D002/D005) and recomputed here.
+  dinuc_shuffle_expected_records: 53176
+  dinuc_shuffle_expected_bases: 56094764
+  # VAL09: expected FIMO data-row counts for the five shuffled null scans, at the
+  # primary threshold. Verified line counts from the historical null-model files.
+  # These are acceptance targets: a scan that misses its count is not published.
+  fimo_null_expected_hits:
+    "01": 616810
+    "02": 616790
+    "03": 615771
+    "04": 616507
+    "05": 614666
+  # Stage 3 observed scan, for the six-dataset manifest.
+  fimo_observed_expected_hits: 716075
+  fimo_observed_expected_loci: 47076
+  significance_alpha: 0.05
+  multiple_testing: "BH"
+  # Stage 14 (effective order 29): FMR1 motif-guided HERVH locus prioritisation.
+  # Recovered from the historical C_rbp/06_..._FMR1_panel_B.R CFG. The p-value cut is an
+  # INDEPENDENT post-filter of the PRIMARY parsed hits (D016), deliberately a separate key
+  # from fimo_strict_pvalue: stage 14 never reads the stage-11 strict datasets.
+  fmr1_locus_screen:
+    rbp: "FMR1"                   # first '|' token of motif_alt_id (pools every FMR1 motif)
+    subfamily: "HERVH"            # HERV_id / sequence_name with '-int_.*$' removed
+    pvalue_cut: 1.0e-5
+    pvalue_comparison: "less_equal"
+    candidate_min_hits: 2
+    candidate_top_n: 50
+    expected_candidates: 4        # VAL26 acceptance target
+
+domains:
+  min_hmm_profile_coverage: 0.40
+  min_exonic_overlap_fraction: 0.80
+  all_coverage_threshold: 0.0             # second run used by the comparisons
+  # Terminal-exon "stringent rule" of 04 step 1: a qualifying association is terminal when
+  # the union of its terminal-exon overlap covers >= this fraction of the domain. A literal
+  # 0.80 in the historical 05_build_domain_centered_terminal_exon_table.py, independent of
+  # --min-exon-overlap; exposed here so no threshold lives in code (effective order 30).
+  min_terminal_exon_overlap_fraction: 0.80
+  # 04 step 2 (effective order 31): transcript-aware positional null. The historical v2
+  # defaults (--seed 1234, --n-permutations 10000), recovered from the script and its saved
+  # qc table. The seed drives only the Monte Carlo columns (numpy default_rng / PCG64); the
+  # expected count, exact 95% range and exact P (VAL34) are deterministic enumeration.
+  positional_null_seed: 1234
+  positional_null_n_permutations: 10000
+
+lncrna:
+  # One shared binning rule. Two historical code paths disagreed by one gene at
+  # the 50% boundary; the release must adopt a single rule and record which
+  # published value it reproduces.
+  coverage_bins:
+    minor_max: 0.10
+    substantial_max: 0.50
+    dominant_max: 0.80
+    # predominant = greater than dominant_max
+  # Resolved by D029 (effective order 37): the manuscript Methods definition, right-closed.
+  #   minor        x <= minor_max
+  #   substantial  minor_max < x <= substantial_max
+  #   dominant     substantial_max < x <= dominant_max
+  #   predominant  x > dominant_max
+  # x is the EXACT ratio herv_bp_in_gene_body / gene_body_bp of the D027-corrected order-35
+  # table (integer cross-multiplication); the rounded fraction/percent columns are display only.
+  boundary_rule: "right_closed"
+  classification_value: "exact_ratio"
+
+sparcs:
+  ifn_motif_overlap_collapse_fraction: 0.50
+  ifn_cluster_window_bp: 75
+  # Effective order 43 (build_sparcs_candidates.py): an antisense LTR x transcript-feature
+  # relationship is kept when its BED half-open overlap is at least this many bp. The
+  # historical --min-overlap-bp default: any positive overlap; no LTR or feature fraction.
+  candidate_min_overlap_bp: 1
+  # Effective order 45 (analyse_sparcs.R), the historical E_sparcs/01_analysis_sparcs.R thresholds:
+  # GO BP ORA and MSigDB C7 ORA of the coding_3UTR genes (clusterProfiler, BH)
+  enrichment_pvalue_cutoff: 0.05
+  enrichment_qvalue_cutoff: 0.20
+  # the IFN-high GO subset is run only with at least this many genes
+  ifn_high_go_min_genes: 10
+  # per-motif Fisher tests (BH per branch): Enriched / Depleted when p_adj < this
+  tf_motif_padj_cutoff: 0.05
+  # GO BP ORA of the enriched / depleted TF symbols
+  tf_go_pvalue_cutoff: 0.10
+  tf_go_qvalue_cutoff: 0.20

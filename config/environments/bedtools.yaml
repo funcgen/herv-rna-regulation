@@ -1,0 +1,175 @@
+# env_bedtools — genome arithmetic for 03_transcript_context and 07_sparcs.
+#
+# STATUS: VALIDATED_RELEASE_PIN (2026-09-28, D025) -- every operation and mode the
+#         release uses (sort, merge, subtract, intersect, closest) is
+#         VALIDATED_FOR_HISTORICAL_COMPATIBILITY, and the canonical downstream counts
+#         VAL28, VAL29 and the D022-corrected VAL30 reproduce exactly (effective
+#         order 19). historical_version stays UNKNOWN: 2.31.1 is an empirically
+#         validated release-compatible version, not the version that ran historically.
+#
+# The historical bedtools version is NOT recorded anywhere in the historical
+# scripts, logs or outputs. ENVIRONMENT_PLAN.tsv marks this env UNKNOWN_VERSION
+# and PIN_AND_RECORD, and calls it "a genuine gap: bedtools intersect/merge/
+# subtract/closest underpin every overlap count including the Figure 2A values".
+#
+# THIS PIN IS NOT A CLAIM ABOUT WHAT RAN HISTORICALLY. It is a choice made now,
+# to be validated empirically when the bedtools-dependent steps are compared
+# against historical outputs.
+name: env_bedtools
+tool: bedtools
+version: "2.31.1"
+historical_version: UNKNOWN
+status: VALIDATED_RELEASE_PIN
+status_history:
+  - {date: "2026-09-23", status: PROVISIONAL_PIN_PENDING_OVERLAP_VALIDATION, record: D020}
+  - {date: "2026-09-24", status: OPERATION_SPECIFIC_VALIDATION, record: D021}
+  - {date: "2026-09-28", status: VALIDATED_RELEASE_PIN, record: D025}
+
+# What the evidence supports, per operation. VALIDATED_FOR_HISTORICAL_COMPATIBILITY
+# means: bedtools 2.31.1 reproduces the accepted historical output of this
+# pipeline's own invocation of that operation exactly. It says nothing about
+# which version ran historically, and nothing about whether the historical
+# invocation implemented the intended biology (for step 2 it did not -- D022).
+operations:
+  merge:
+    status: VALIDATED_FOR_HISTORICAL_COMPATIBILITY
+    canonical_use: none at present (step 2 is per-gene Python since D022)
+    invocation: "bedtools merge -i <genome-sorted exon BED6> -c 4,6 -o distinct,distinct"
+    evidence: >
+      03_transcript_context step 2 (effective order 9), SLURM 3233599:
+      gencode.v48.gene_exons_merged.bed.gz, 396,877 rows, decompressed sha256
+      351df0292e2fd2ee7a8a9bf680169d8cb5f488fb19d21312d57c2e1cabca1497, identical
+      to the historical file (CONTENT_IDENTICAL_GZIP_DIFFERS).
+  subtract:
+    status: VALIDATED_FOR_HISTORICAL_COMPATIBILITY
+    canonical_use: none at present (step 2 is per-gene Python since D022)
+    invocation: "bedtools subtract -a <genome-sorted genes> -b <merged exons>"
+    evidence: >
+      same run: gencode.v48.gene_introns.bed.gz, 470,794 rows, decompressed sha256
+      ac4efd412ee377df2ee58615f99551e1b9a0dae80024abb8c0cdd0380884a1d5, identical
+      to the historical file (CONTENT_IDENTICAL_GZIP_DIFFERS).
+  sort:
+    status: VALIDATED_FOR_HISTORICAL_COMPATIBILITY
+    invocation: "zcat <asset> | bedtools sort -g <chrom sizes> -i -"
+    canonical_use: effective order 10 / step 3 (sort_assets.sh)
+    evidence: >
+      Effective order 10, SLURM 3267128 (probe) and 3269195 (canonical): bedtools
+      2.31.1 sort -g on the accepted step-1 inputs reproduces the decompressed
+      content of all five historical sorted assets exactly (genes, transcripts,
+      exons, CDS, UTR), including the order of records tied on (chrom, start).
+      Keys are chromosome rank, then start; tie order is bedtools' internal
+      unstable order -- deterministic for identical input and binary (re-run
+      byte-identical, SLURM 3269196) but not a declarative rule and not idempotent.
+  intersect:
+    status: VALIDATED_FOR_HISTORICAL_COMPATIBILITY
+    invocation: "bedtools intersect [-s] -wa -wb -a <HERV sorted> -b <feature sorted>"
+    canonical_use: effective order 12 / step 5 (overlap_internal_vs_features.sh)
+    evidence: >
+      Effective order 12, SLURM 3281169: the six overlap tables that D022 does
+      not affect (HERV x genes, CDS, UTR; any-strand and -s) are BYTE-IDENTICAL
+      to the historical tables. All ten tables equal an exhaustive independent
+      Python enumeration of overlapping pairs (SLURM 3281170). The four
+      exon/intron tables differ from history only because D022 corrected their
+      inputs, and equal the adjudication audit's per-gene prediction.
+    modes_validated:
+      - "-wa -wb [-s]  (effective order 12)"
+      - "-sorted -g <chrom sizes> -s -wo  (effective order 14, SLURM 3283607: the four D022-independent domain tables byte-identical)"
+      - "-sorted -g <chrom sizes> -S -wo  (effective order 15, SLURM 3284475: all five antisense LTR tables byte-identical)"
+    modes_pending: []
+  closest:
+    status: VALIDATED_FOR_HISTORICAL_COMPATIBILITY
+    invocation: "bedtools closest -g <chrom sizes> [-s] -d -a <HERV sorted> -b <genes|TSS sorted>"
+    canonical_use: effective order 13 / step 6 (closest_gene_tss.sh)
+    evidence: >
+      Effective order 13, SLURM 3282715 (re-run 3283011, byte-identical, with the
+      in-job version record): all four tables (gene and TSS, any-strand and -s) are
+      BYTE-IDENTICAL to the historical tables, and equal an exhaustive independent
+      Python nearest-feature enumeration (SLURM 3282716) using the convention
+      distance 0 = overlap, else gap + 1, all ties reported.
+
+selection_basis: >
+  The project's own existing conda environment already provides it, so nothing
+  is installed. hervarium-ncrna is the same environment that supplies the pinned
+  MEME 5.5.9 used by 02_rbp stages 2, 3 and 7, which keeps the tool stack in one
+  place. Two versions are present on the system (2.31.1 in hervarium-ncrna,
+  atacseq and te_preprocessing; 2.30.0 in explorate_env); 2.31.1 was chosen for
+  that reason alone, not on evidence about the historical run.
+
+provision:
+  system: cnag
+  method: existing conda environment (no installation permitted on CNAG)
+  env_path: "/path/to/conda/envs/hervarium-ncrna"
+  executable: "/path/to/conda/envs/hervarium-ncrna/bin/bedtools"
+  verified_on: "2026-09-23"
+  verified_output: "bedtools v2.31.1"
+
+validation:
+  method: >
+    Exact reproduction of the historical overlap and closest outputs by the
+    bedtools-dependent steps (effective orders 12-15 and the LTR projection),
+    and of the downstream counts VAL28, VAL29 and VAL30.
+  promote_to: VALIDATED_RELEASE_PIN
+  promote_when: those outputs reproduce exactly
+  assessment_2026-09-24_after_effective_order_15: >
+    NOT YET PROMOTED. Effective orders 12-15 now reproduce history exactly (every
+    D022-independent table byte-identical) and every operation and intersect mode
+    used so far is validated. Two named conditions remain open: (1) the promoted
+    LTR projection (effective order 16, D017) has not run; (2) the downstream counts
+    VAL28 and VAL29 (headline totals) and VAL30 (Figure 2A; now read with the D022
+    corrected values 11,001 / 2,435 / 3,352 / 434) have only been reproduced in
+    validation-only reconstructions, not yet by the canonical summary step
+    (effective order 19).
+  assessment_2026-09-24_after_effective_order_17: >
+    NOT YET PROMOTED. Condition (1) is now met: the LTR projection (effective
+    order 16) ran and was validated. The integrated locus table (effective order
+    17) reproduces history except in its predeclared D022 and LTR-status-authority
+    cells. Condition (2) remains open: VAL28-30 have still been reproduced only in
+    validation-only runs (Figure 2A on a temporary copy of the order-17 table), not
+    by the canonical summary step (effective order 19).
+  assessment_2026-09-28_after_effective_order_19: >
+    PROMOTED to VALIDATED_RELEASE_PIN (D025), exactly as the promote_when rule
+    requires. (1) Effective orders 10-15 reproduce history exactly for every
+    D022-independent output, and every operation and mode used is validated; the
+    LTR projection (effective order 16) was validated at order 17. (2) The
+    canonical summary step, effective order 19 (build_gene_overlap_tables.R, run
+    locally 2026-09-28), derives from the accepted integrated table VAL28 =
+    11,397 loci / 4,074 lncRNA genes and VAL29 = 3,514 / 1,521, identical to the
+    published values, and VAL30 = 11,001 / 2,435 / 3,352 / 434, the D022-corrected
+    anchors (D024). The independent validator reproduces all of them, and the same
+    producer on the April table reproduces the published historical files byte for
+    byte. historical_version remains UNKNOWN.
+  on_failure: >
+    Investigate before changing version. A mismatch is evidence about the
+    historical environment and must be understood, not silently patched by
+    trying other versions.
+
+exercised_by:
+  - "effective order 9 / step 2, HISTORICAL REPRODUCTION ONLY (forensic, D022):
+     sort, merge, subtract; SLURM 3233599 on cnd29, in-job 'bedtools v2.31.1'.
+     This is the evidence behind the merge/subtract statuses above."
+
+# The CANONICAL step 2 no longer uses bedtools. D022 (resolved 2026-09-24)
+# replaced the historical genome-wide merge/subtract, a confirmed implementation
+# bug, with a per-gene exon union in Python (build_gene_introns.py). The
+# merge/subtract compatibility result stays valid: it describes the historical
+# computation, which the release still reproduces exactly as a forensic record.
+exercised_by_canonical:
+  - "effective order 10 / step 3 -- sort; SLURM 3269195 on cnd29, in-job 'bedtools v2.31.1'"
+  - "effective order 15 / step 8 -- sort (LTRs) and intersect -sorted -g -S -wo; SLURM 3284475 on cnd22, in-job 'bedtools v2.31.1'"
+  - "effective order 14 / step 7 -- sort (domains) and intersect -sorted -g -s -wo; SLURM 3283607 on cnd22, in-job 'bedtools v2.31.1'"
+  - "effective order 13 / step 6 -- closest -d [-s]; SLURM 3282715 / 3283011 on cnd22, in-job 'bedtools v2.31.1'"
+  - "D023 TSS prerequisite of order 13 -- sort only; SLURM 3282113; historical sorted TSS content reproduced"
+  - "effective order 12 / step 5 -- sort (HERV BED) and intersect -wa -wb [-s]; SLURM 3281169 on cnd34, in-job 'bedtools v2.31.1'"
+  - "effective order 11 / step 4 -- sort only (ordering of the UTR split and last-exon BEDs); SLURM 3280080; historical content reproduced for all 3 outputs"
+
+not_used_by:
+  - "effective order 9 / step 2, canonical per-gene producer (D022)"
+  - "effective order 16, 07_sparcs minimal LTR projection (pure Python)"
+  - "effective order 17 / step 9, integrated locus table (pandas; consumes the bedtools outputs of orders 12-13 but runs no bedtools)"
+  - "effective order 18 / step 10, HERV_id attachment (stdlib text-level join; no bedtools)"
+  - "effective order 19 / step 11, gene-overlap summaries and Figure 2A source (R; parses integrated fields; no bedtools)"
+
+not_yet_exercised_by:
+  - "effective order 8 / step 1 (Extract GENCODE features) — pure Python GTF
+     parsing; bedtools is not invoked, so step 1 provides NO evidence for or
+     against this pin"

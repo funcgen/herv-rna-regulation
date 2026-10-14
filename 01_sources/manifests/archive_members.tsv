@@ -1,0 +1,2 @@
+source_id	archive	archive_md5	member	member_md5	member_size_bytes	extraction_command
+SRC09	HERV_LTR_fimo_results_tsv.tar.xz	618a92cbf61443373b2d4750552ce42e	merged_fimo_parsed_v4.tsv	0a86e40e8a6648faad2b214079b1d255	6268393617	tar xJf HERV_LTR_fimo_results_tsv.tar.xz

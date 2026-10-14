@@ -1,0 +1,5 @@
+source_id	snapshot_name	origin	retrieval_date	status
+SRC14a	lncrnawiki.json	LncRNAWiki portal export (https://ngdc.cncb.ac.cn/lncrnawiki/)	2026-03-10	AVAILABLE
+SRC16	lncrna_abstracts_dataset_full_no_function_filter.csv	NCBI PubMed through the E-utilities (Biopython Bio.Entrez), publication years 2000 onward	2026-03-11	AVAILABLE
+SRC17	ensembl_biomart_go_per_gene.recovered_2026-04-16.tsv	Ensembl BioMart (https://www.ensembl.org/biomart/); Ensembl release not recorded	2026-04-16	AVAILABLE
+SRC18	msigdb_2026.1.Hs_C7_term2gene.tsv; msigdb_2026.1.Hs_C7_term2name.tsv	msigdbr 26.1.0 (MSigDB 2026.1.Hs), written by 01_sources/scripts/freeze_msigdb_c7.R	2026-09-30	AVAILABLE

@@ -1,0 +1,67 @@
+# Analysis profiles for the 02_rbp null-model branch.
+#
+# The RBP null-model analysis is run twice on the SAME scientific code, over two
+# different motif-call datasets:
+#
+#   primary  the FIMO scans as run, p <= 1e-4
+#   strict   those same scans post-filtered to p <= 1e-5 (stage 11)
+#
+# Historically this was done by copying scripts 08, 09 and 10 to *_1e-5.R and
+# editing their path constants. A direct diff of the recovered pairs shows the
+# copies differ by 2, 2 and 1 lines respectively, all of them paths, with ZERO
+# difference in scientific logic. That duplication is what this file replaces:
+# the release keeps one implementation of each calculation and selects a profile.
+#
+# NOTHING HERE CHANGES A STATISTICAL DEFINITION. A profile names datasets and
+# output locations; thresholds, universes, tests and FDR semantics live in the
+# analysis scripts and are identical across profiles.
+#
+# The strict datasets are a POST-FILTER of the primary FIMO output, not a second
+# FIMO run (decision D016). The threshold below is recorded as documentation of
+# how those inputs were produced, not as something this stage applies.
+
+profiles:
+
+  primary:
+    analysis_label: "primary"
+    threshold: "1.0e-4"
+    source: "fimo_as_run"
+    dataset_manifest: "02_rbp/results/null_model/fimo_dataset_manifest.tsv"
+    observed_fimo: "results/fimo_primary/fimo.tsv"
+    shuffle_fimo_template: "results/null_model/fimo/shuffle{rep}/fimo.tsv"
+    global_output_root: "02_rbp/results/enrichment"
+    subfamily_output_root: "02_rbp/results/enrichment/subfamily"
+    followup_output_root: "02_rbp/results/enrichment/hervh_hervk_followup"
+    expected_hits:
+      observed: 716075
+      "01": 616810
+      "02": 616790
+      "03": 615771
+      "04": 616507
+      "05": 614666
+
+  strict:
+    analysis_label: "strict"
+    threshold: "1.0e-5"
+    source: "post_filtered_primary_FIMO"     # D016; NOT a FIMO rerun
+    dataset_manifest: "02_rbp/results/sensitivity_strict/analysis/fimo_dataset_manifest.tsv"
+    observed_fimo: "results/sensitivity_strict/observed/fimo.tsv"
+    shuffle_fimo_template: "results/sensitivity_strict/shuffle{rep}/fimo.tsv"
+    global_output_root: "02_rbp/results/sensitivity_strict/analysis/global"
+    subfamily_output_root: "02_rbp/results/sensitivity_strict/analysis/subfamily"
+    followup_output_root: "02_rbp/results/sensitivity_strict/analysis/hervh_hervk_followup"
+    expected_hits:
+      observed: 13702
+      "01": 12224
+      "02": 12138
+      "03": 12352
+      "04": 12204
+      "05": 12235
+
+# Shared by both profiles; stated once so a profile cannot drift from it.
+shared:
+  fasta: "01_sources/frozen/herv/HERV_internal_sequences_v5.fasta"
+  motif_library: "02_rbp/results/motif_library/attract_hsa_cisbp.meme"
+  locus_universe: 53176
+  total_bases: 56094764
+  rbp_universe: 93

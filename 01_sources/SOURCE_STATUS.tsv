@@ -1,0 +1,19 @@
+source_id	file	version	source	checksum	used_by
+SRC01	GRCh38.primary_assembly.genome.fa	GENCODE release 48	https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_48/	-	03 (chromosome sizes from the .fai)
+SRC02	gencode.v48.primary_assembly.annotation.gtf	GENCODE release 48	https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_48/	sha256 of the uncompressed GTF: 0bc33e92c494f98f0ad91b0c4cde56f7caafe8e62d270a9f8554d0991765a155	03, 05, 07
+SRC03	HERV_internal_sequences_v5.fasta	Zenodo record 17662456	https://doi.org/10.5281/zenodo.17662456	md5 0a8dc26d38243509983c61b4de3ce5d7	02
+SRC04	HERV_internal_v5.bed	Zenodo record 17662456	https://doi.org/10.5281/zenodo.17662456	md5 dc0c77396229b1616e39a2cb13b294c0	03
+SRC05	HERV_domains_v5.bed	Zenodo record 17662456	https://doi.org/10.5281/zenodo.17662456	md5 f02b8bb89f19a0a2a3ac45efcd900898	03, 04
+SRC06	HERV_loci_annotated_domains_v5.tsv	Zenodo record 17662456	https://doi.org/10.5281/zenodo.17662456	md5 162cba73027d1e4500dc1dbb2671c84a	03, 04
+SRC07	HERV_ltr.bed	Zenodo record 19593457	https://doi.org/10.5281/zenodo.19593457	md5 ef318953ea35e2821431f943c5e20007	03, 07
+SRC08	HERV_LTR_U3_R_U5_catalogue.tsv	Zenodo record 19593457	https://doi.org/10.5281/zenodo.19593457	md5 8c685d0dbb30372cbab5e10167f308fb	07
+SRC09	HERV_LTR_fimo_results_tsv.tar.xz	Zenodo record 19593457	https://doi.org/10.5281/zenodo.19593457	archive md5 618a92cbf61443373b2d4750552ce42e; member merged_fimo_parsed_v4.tsv md5 0a86e40e8a6648faad2b214079b1d255	07
+SRC10	HERV_internal_LTR_map.tsv	Zenodo record 19593457	https://doi.org/10.5281/zenodo.19593457	md5 a0aa5d8cdcac58bf719d0df4bf07f3fe	03
+SRC12a	ATtRACT_db.txt	Zenodo record 19661036	https://doi.org/10.5281/zenodo.19661036	md5 18c54e3f9cf970d267ed5eb3890e9c12	02
+SRC12b	pwm.txt	Zenodo record 19661036	https://doi.org/10.5281/zenodo.19661036	md5 7ff45b94c14d1b992680f561e0a038a4	02
+SRC13	hervs_internal_and_ltrs.gtf	Zenodo record 19661036	https://doi.org/10.5281/zenodo.19661036	md5 3570d4709785a2890dd9bd86b8783d91	03
+SRC14a	lncrnawiki.json	snapshot 2026-03-10	https://ngdc.cncb.ac.cn/lncrnawiki/	sha256 6f2deacf7b50cf2e8cc1ac920eeab833a77d06dfa46199af06002d2eb015d1ed	05
+SRC16	lncrna_abstracts_dataset_full_no_function_filter.csv	retrieved 2026-03-11	NCBI PubMed (E-utilities)	sha256 f7fa538aa38f902f790dd299f3405e32d6e1971089d5a2975d31fb5d325bf218	06
+SRC17	ensembl_biomart_go_per_gene.recovered_2026-04-16.tsv	retrieved 2026-04-16 (Ensembl release not recorded)	https://www.ensembl.org/biomart/	sha256 2dad964626022d09321de6a5c2dee06c420845aa1aca08ff06dbad72e77ee8c8	05
+SRC18	msigdb_2026.1.Hs_C7_term2gene.tsv; msigdb_2026.1.Hs_C7_term2name.tsv	MSigDB 2026.1.Hs (msigdbr 26.1.0)	https://www.gsea-msigdb.org/gsea/msigdb/ (01_sources/scripts/freeze_msigdb_c7.R)	sha256 e739b529eb7055bf34cd244aaf4359da6de6080aa9ccf93f3498c9cf5f51839b; sha256 48a1a51f05659de4e754a7a77436cd65105365dd3c076f2a1986ed0868f7bcba	07
+SRC20	org.Hs.eg.db; GO.db	Bioconductor 3.18 (3.18.0)	https://bioconductor.org	-	02, 07, 08

@@ -1,0 +1,55 @@
+# env_r_stats — R statistics environment for 02_rbp (stages 8-10, 12-13) and 07_sparcs.
+#
+# Status: KNOWN_EXACT. The environment plan marked this RECOVER_FROM_SESSIONINFO_THEN_PIN;
+# the recovery is done. sessionInfo.txt written by the historical rbp/10 run into
+# rbp/null_dinuc/results/hervh_hervk_followup/ records the interpreter, platform and every
+# package version, and the live conda environment still matches it exactly.
+name: env_r_stats
+r_version: "4.3.3"            # 2024-02-29
+platform: "x86_64-conda-linux-gnu (64-bit)"
+running_under: "AlmaLinux 9.8 (Olive Jaguar)"
+blas_lapack: "libopenblasp-r0.3.26.so; LAPACK 3.12.0"
+
+packages:                      # versions verified against the historical sessionInfo.txt
+  # Core tidyverse — stages 8, 9, 10
+  readr: "2.1.4"
+  dplyr: "1.1.4"
+  tidyr: "1.3.1"
+  purrr: "1.0.2"
+  stringr: "1.5.1"
+  tibble: "3.2.1"
+  # Enrichment / annotation stack — stage 10 (GO ORA, pre-ranked GSEA, heatmap).
+  # These pin BIOLOGICAL CONTENT, not just code: org.Hs.eg.db and GO.db decide
+  # which genes belong to which GO term, so a different version can change the
+  # result with byte-identical code. They are the highest-risk pins in the release.
+  clusterProfiler: "4.10.1"
+  enrichplot: "1.22.0"
+  fgsea: "1.28.0"
+  org.Hs.eg.db: "3.18.0"
+  GO.db: "3.18.0"
+  AnnotationDbi: "1.64.1"
+  ggplot2: "3.5.0"
+  pheatmap: "1.0.12"
+
+provision:
+  system: cnag
+  method: existing conda environment (no installation permitted on CNAG)
+  env_path: "/path/to/conda/envs/seurat5"
+  rscript: "/path/to/conda/envs/seurat5/bin/Rscript"
+  note: >
+    Recorded as the site-provided location. Scripts resolve Rscript through
+    NCRNA_RSCRIPT or PATH, so this path is configuration, not a runtime literal.
+
+evidence:
+  sessionInfo: "rbp/null_dinuc/results/hervh_hervk_followup/sessionInfo.txt"
+  verified: >
+    All 13 versions above were checked against the live seurat5 environment on
+    2026-09-23 (SLURM 3228920) and every one matched.
+  note: >
+    The single best environment record in the project. It belongs to rbp/10, which ran in
+    the same results directory and the same analysis chain as rbp/08, so it is the
+    environment for this stage too. Correctness is nevertheless established by exact
+    reproduction of the historical stage-8 outputs, not by the version record alone.
+
+# BLAS note: the medians, sums and Wilcoxon statistic here are plain R arithmetic, not
+# BLAS calls, so the linked OpenBLAS build does not affect these results.

@@ -1,0 +1,232 @@
+scope	column	kind	definition
+rbp	subfamily	label_text	HERV subfamily of the internal-region loci (locus id prefix before "-int_")
+rbp	rbp	id_text	RNA-binding protein (motif library gene symbol); several motif matrices of one RBP are pooled
+rbp	n_loci	integer	number of HERV internal-region loci of the subfamily
+rbp	observed_total_hits	numeric	FIMO motif occurrences (P <= 1e-4) of the RBP summed over the subfamily's original loci
+rbp	mean_shuffled_total_hits	numeric	mean over the five dinucleotide-preserving shuffled datasets of the summed motif occurrences
+rbp	observed_hits_per_kb	numeric	observed_total_hits / total subfamily sequence length (kb)
+rbp	mean_shuffled_hits_per_kb	numeric	mean_shuffled_total_hits / total subfamily sequence length (kb)
+rbp	density_difference_per_kb	numeric	observed_hits_per_kb - mean_shuffled_hits_per_kb
+rbp	log2_observed_expected	numeric	log2((observed_total_hits + 0.5) / (mean_shuffled_total_hits + 0.5)); the 0.5 pseudocount only keeps the ratio finite
+rbp	loci_with_observed_hit	integer	loci with at least one observed motif occurrence of the RBP
+rbp	median_observed_hits_per_locus	numeric	median per-locus observed occurrences
+rbp	median_shuffled_hits_per_locus	numeric	median per-locus mean shuffled occurrences
+rbp	p_value	p_value	paired two-sided Wilcoxon signed-rank test (normal approximation with continuity correction) of per-locus observed vs per-locus mean shuffled occurrences; blank = no valid test (fewer than 5 loci or all differences zero)
+rbp	p_adj_global	p_value	Benjamini-Hochberg adjustment across all valid subfamily x RBP tests (global; decides status)
+rbp	p_adj_within_subfamily	p_value	Benjamini-Hochberg adjustment within the subfamily (descriptive only)
+rbp	status	label_text	enriched / depleted: p_adj_global < 0.05 with log2_observed_expected > 0 / < 0; otherwise not_significant
+gsea	pathway	id_text	GO Biological Process term identifier
+gsea	TERM	label_text	GO term name (GO.db 3.18.0)
+gsea	direction	label_text	end of the ranking the term is enriched toward: HERVH (NES > 0) or HERVK (NES < 0)
+gsea	pval	p_value	fgsea multilevel p-value (fgseaMultilevel, eps = 0, seed 260730)
+gsea	padj	p_value	Benjamini-Hochberg adjusted p-value over the tested terms
+gsea	log2err	numeric	fgsea expected error of log2(p)
+gsea	ES	numeric	enrichment score
+gsea	NES	numeric	normalised enrichment score
+gsea	size	integer	number of ranked RBPs annotated to the term (gene-set size 5-50)
+gsea	leading_edge_size	integer	number of leading-edge RBPs
+gsea	leading_edge_RBPs	id_text	leading-edge RBPs, ";"-separated
+gsea	rbp	id_text	RNA-binding protein (all 93 tested)
+gsea	HERVH	numeric	composition-controlled log2(O/E) in HERVH
+gsea	HERVK	numeric	composition-controlled log2(O/E) in HERVK
+gsea	contrast_HERVH_minus_HERVK	numeric	HERVH - HERVK log2(O/E); the statistic used to rank the RBPs for the GSEA. Rows are in ranking order (first = most HERVH-biased); tied values (24 RBPs at 0 and three tied pairs) are ordered by a deterministic tie-break
+gsea	rank_statistic_used	numeric	ranking statistic passed to fgsea (the contrast with a deterministic tie-break)
+gsea	rank_position	integer	position in the ranking (1 = most HERVH-biased)
+sens	threshold	label_text	FIMO threshold: 1e-4 = primary analysis (P <= 1e-4); 1e-5 = sensitivity analysis (P <= 1e-5)
+sens	metric	label_text	global metric: loci_with_hit, pct_with_hit, total_hits, global_hits_per_kb
+sens	observed	numeric	value in the original HERV internal regions (53,176 loci)
+sens	null_mean	numeric	mean over the five dinucleotide-preserving shuffled datasets
+sens	observed_minus_null	numeric	observed - null_mean
+sens	observed_to_null_ratio	numeric	observed / null_mean
+sens	observed_above_all_nulls	logical	TRUE when the observed value exceeds every one of the five shuffled datasets
+sens	subfamily	label_text	HERV subfamily (HERVH or HERVK)
+sens	n_loci	integer	number of loci in the subfamily
+sens	total_length_kb	numeric	total subfamily sequence length (kb)
+sens	observed_total_hits	numeric	observed motif occurrences in the subfamily
+sens	mean_shuffled_total_hits	numeric	mean shuffled motif occurrences in the subfamily
+sens	observed_hits_per_kb	numeric	observed occurrences per kb
+sens	mean_shuffled_hits_per_kb	numeric	mean shuffled occurrences per kb
+sens	global_density_ratio	numeric	observed_hits_per_kb / mean_shuffled_hits_per_kb (family-level O/E)
+sens	median_observed_locus_density	numeric	median per-locus observed occurrences per kb
+sens	median_shuffled_locus_density	numeric	median per-locus mean shuffled occurrences per kb
+sens	median_distinct_rbps_per_locus	numeric	median number of distinct RBPs with an observed occurrence per locus
+sens	enriched_1e4	integer	enriched RBPs at the primary threshold
+sens	enriched_1e5	integer	enriched RBPs at the sensitivity threshold
+sens	enriched_retained	integer	enriched at both thresholds
+sens	enriched_lost	integer	enriched at 1e-4 only
+sens	enriched_gained	integer	enriched at 1e-5 only
+sens	depleted_1e4	integer	depleted RBPs at the primary threshold
+sens	depleted_1e5	integer	depleted RBPs at the sensitivity threshold
+sens	depleted_retained	integer	depleted at both thresholds
+sens	depleted_lost	integer	depleted at 1e-4 only
+sens	depleted_gained	integer	depleted at 1e-5 only
+sens	n_rbps	integer	number of RBPs
+sens	observed_zero	integer	RBPs with zero observed strict-threshold occurrences
+sens	shuffled_mean_zero	integer	RBPs with zero mean shuffled strict-threshold occurrences
+sens	observed_and_shuffled_zero	integer	RBPs with zero observed and zero shuffled strict-threshold occurrences
+sens	evidence_at_least_5	integer	RBPs with strict total evidence (observed + 5 x mean shuffled) >= 5
+sens	evidence_at_least_10	integer	RBPs with strict total evidence >= 10
+sens	evidence_at_least_20	integer	RBPs with strict total evidence >= 20
+sens	rbp	id_text	RNA-binding protein
+sens	observed_total_hits_1e4	numeric	observed occurrences, primary threshold
+sens	mean_shuffled_total_hits_1e4	numeric	mean shuffled occurrences, primary threshold
+sens	observed_hits_per_kb_1e4	numeric	observed occurrences per kb, primary threshold
+sens	mean_shuffled_hits_per_kb_1e4	numeric	mean shuffled occurrences per kb, primary threshold
+sens	log2_observed_expected_1e4	numeric	log2(O/E) with 0.5 pseudocount, primary threshold
+sens	p_value_1e4	p_value	paired Wilcoxon p-value, primary threshold; blank = no valid test
+sens	p_adj_global_1e4	p_value	global BH-adjusted p-value, primary threshold; blank = no valid test
+sens	status_1e4	label_text	enriched / depleted / not_significant at the primary threshold
+sens	observed_total_hits_1e5	numeric	observed occurrences, sensitivity threshold
+sens	mean_shuffled_total_hits_1e5	numeric	mean shuffled occurrences, sensitivity threshold
+sens	observed_hits_per_kb_1e5	numeric	observed occurrences per kb, sensitivity threshold
+sens	mean_shuffled_hits_per_kb_1e5	numeric	mean shuffled occurrences per kb, sensitivity threshold
+sens	log2_observed_expected_1e5	numeric	log2(O/E) with 0.5 pseudocount, sensitivity threshold
+sens	p_value_1e5	p_value	paired Wilcoxon p-value, sensitivity threshold; blank = no valid test
+sens	p_adj_global_1e5	p_value	global BH-adjusted p-value, sensitivity threshold; blank = no valid test
+sens	status_1e5	label_text	enriched / depleted / not_significant at the sensitivity threshold
+sens	direction_1e4	label_text	sign of log2(O/E) at the primary threshold (positive / negative / zero)
+sens	direction_1e5	label_text	sign of log2(O/E) at the sensitivity threshold (positive / negative / zero)
+sens	same_effect_direction	logical	TRUE when both thresholds have the same sign (including zero)
+sens	effect_difference_1e5_minus_1e4	numeric	log2(O/E) at 1e-5 minus log2(O/E) at 1e-4
+sens	analysis	label_text	functional analysis (GO BP over-representation of enriched RBPs; pre-ranked GO BP GSEA)
+sens	result	label_text	accepted result statement (02_rbp sensitivity summary)
+sens	topic	label_text	interpretation topic
+sens	conclusion	label_text	accepted interpretation (02_rbp sensitivity summary)
+sens	foreground	label_text	RBP set used as the GO over-representation foreground
+sens	ID	id_text	GO Biological Process term identifier
+sens	Description	label_text	GO term name
+sens	GeneRatio	id_text	foreground RBPs annotated to the term / mappable foreground RBPs (text ratio)
+sens	BgRatio	id_text	universe RBPs annotated to the term / mappable universe (text ratio)
+sens	pvalue	p_value	hypergeometric over-representation p-value (clusterProfiler enrichGO)
+sens	p.adjust	p_value	Benjamini-Hochberg adjusted p-value
+sens	qvalue	p_value	Storey q-value (clusterProfiler)
+sens	geneID	id_text	annotated foreground RBPs, "/"-separated
+sens	Count	integer	number of annotated foreground RBPs
+sens	pathway	id_text	GO Biological Process term identifier
+sens	TERM	label_text	GO term name
+sens	direction	label_text	HERVH (NES > 0) or HERVK (NES < 0)
+sens	pval	p_value	fgsea multilevel p-value
+sens	padj	p_value	Benjamini-Hochberg adjusted p-value
+sens	log2err	numeric	fgsea expected error of log2(p)
+sens	ES	numeric	enrichment score
+sens	NES	numeric	normalised enrichment score
+sens	size	integer	gene-set size within the ranking
+sens	leading_edge_size	integer	number of leading-edge RBPs
+sens	leading_edge_RBPs	id_text	leading-edge RBPs, ";"-separated
+pc	gene_stable_id	id_text	Ensembl gene identifier with version (GENCODE v48)
+pc	gene_name	id_text	GENCODE gene name (the Ensembl id when no name is assigned)
+pc	gene_type	label_text	GENCODE gene_type
+pc	chrom	id_text	chromosome (GRCh38)
+pc	strand	label_text	gene strand
+pc	gene_start	integer	gene start, 1-based inclusive (GENCODE v48 GTF)
+pc	gene_end	integer	gene end, 1-based inclusive
+pc	gene_body_bp	integer	gene body length (gene_end - gene_start + 1)
+pc	exonic_bp	integer	length of the union of the gene's exons over all its transcripts
+pc	n_overlapping_hervs	integer	distinct same-strand HERV internal-region loci overlapping the gene
+pc	herv_bp_in_gene_body	integer	gene-body bases covered by same-strand HERV internal regions (HERV BED intervals read as 0-based half-open)
+pc	herv_bp_in_exons	integer	exonic bases covered by same-strand HERV internal regions
+pc	gene_body_herv_fraction	numeric	herv_bp_in_gene_body / gene_body_bp, rounded to 4 decimals
+pc	gene_body_herv_percent	numeric	100 x herv_bp_in_gene_body / gene_body_bp, rounded to 2 decimals
+pc	exonic_herv_fraction	numeric	herv_bp_in_exons / exonic_bp, rounded to 4 decimals
+pc	exonic_herv_percent	numeric	100 x herv_bp_in_exons / exonic_bp, rounded to 2 decimals
+pc	overlapping_subfamilies	id_text	HERV subfamilies of the overlapping loci
+c7	ID	id_text	MSigDB C7 gene-set name (MSigDB 2026.1.Hs)
+c7	Description	label_text	MSigDB gene-set description (MSigDB 2026.1.Hs)
+c7	GeneRatio	id_text	foreground genes in the set / mappable foreground genes (text ratio)
+c7	BgRatio	id_text	universe genes in the set / mappable universe genes (text ratio)
+c7	pvalue	p_value	hypergeometric over-representation p-value (clusterProfiler enricher)
+c7	p.adjust	p_value	Benjamini-Hochberg adjusted p-value over the tested C7 sets
+c7	qvalue	p_value	Storey q-value
+c7	geneID	id_text	foreground genes in the set, "/"-separated
+c7	Count	integer	number of foreground genes in the set
+tf	motif_alt_id	id_text	TF motif name (FIMO motif scan of the HERV LTRs, motif_alt_id)
+tf	fg_with	integer	number of the 4,683 foreground LTRs (unique lncRNA-branch SPARCS-like LTRs) containing the motif
+tf	fg_total	integer	foreground LTRs (unique lncRNA-branch SPARCS-like LTRs)
+tf	bg_with	integer	number of the 552,200 background LTRs (all scanned HERV LTRs minus the foreground) containing the motif
+tf	bg_total	integer	background LTRs
+tf	odds_ratio	numeric	Fisher's exact test odds-ratio estimate (conditional MLE)
+tf	p_value	p_value	two-sided Fisher's exact test p-value
+tf	p_adj	p_value	Benjamini-Hochberg adjusted p-value over the 730 motifs of the branch
+tf	log2_OR	numeric	log2(odds_ratio)
+tf	sig	label_text	Enriched / Depleted when p_adj < 0.05 (direction from the odds ratio)
+tf	ID	id_text	GO Biological Process term identifier
+tf	Description	label_text	GO term name
+tf	GeneRatio	id_text	depleted TF symbols annotated to the term / mappable depleted TF symbols (text ratio)
+tf	BgRatio	id_text	universe TF symbols annotated to the term / mappable universe (text ratio)
+tf	pvalue	p_value	hypergeometric over-representation p-value (clusterProfiler enrichGO)
+tf	p.adjust	p_value	Benjamini-Hochberg adjusted p-value (reporting cutoff p.adjust < 0.10)
+tf	qvalue	p_value	Storey q-value
+tf	geneID	id_text	annotated depleted TF symbols, "/"-separated
+tf	Count	integer	number of annotated depleted TF symbols
+sens	retained_enriched	id_text	RBPs enriched at both thresholds, comma-separated (blank = none)
+sens	lost_enriched	id_text	RBPs enriched at 1e-4 but not at 1e-5, comma-separated (blank = none)
+sens	gained_enriched	id_text	RBPs enriched at 1e-5 but not at 1e-4, comma-separated (blank = none)
+sens	retained_depleted	id_text	RBPs depleted at both thresholds, comma-separated (blank = none)
+sens	lost_depleted	id_text	RBPs depleted at 1e-4 but not at 1e-5, comma-separated (blank = none)
+sens	gained_depleted	id_text	RBPs depleted at 1e-5 but not at 1e-4, comma-separated (blank = none)
+sens	strict_total_evidence	integer	observed strict hits + 5 x mean shuffled strict hits (summed strict null over the five replicates); data volume, not a statistic
+sens	minimum_strict_evidence	integer	minimum strict total evidence for an RBP to be included (0 = all 93 RBPs)
+sens	pearson	numeric	Pearson correlation of log2(O/E) at 1e-4 and 1e-5 among the included RBPs
+sens	spearman	numeric	Spearman correlation of log2(O/E) at 1e-4 and 1e-5 among the included RBPs
+sens	same_direction	integer	included RBPs with the same log2(O/E) sign at both thresholds (including zero)
+sens	pct_same_direction	numeric	100 x same_direction / n_rbps
+lnc	gene_stable_id	id_text	Ensembl gene identifier with version (GENCODE v48)
+lnc	gene_name	id_text	GENCODE gene name (the Ensembl id when no name is assigned)
+lnc	gene_type	label_text	GENCODE gene_type
+lnc	chrom	id_text	chromosome (GRCh38)
+lnc	strand	label_text	gene strand
+lnc	gene_start	integer	gene start, 1-based inclusive (GENCODE v48 GTF)
+lnc	gene_end	integer	gene end, 1-based inclusive
+lnc	gene_body_bp	integer	gene body length (gene_end - gene_start + 1)
+lnc	exonic_bp	integer	length of the union of the gene's exons over all its transcripts
+lnc	n_overlapping_hervs	integer	distinct same-strand HERV internal-region loci overlapping the gene
+lnc	herv_bp_in_gene_body	integer	gene-body bases covered by same-strand HERV internal regions (HERV BED intervals read as 0-based half-open)
+lnc	herv_bp_in_exons	integer	exonic bases covered by same-strand HERV internal regions
+lnc	gene_body_herv_fraction	numeric	herv_bp_in_gene_body / gene_body_bp, rounded to 4 decimals
+lnc	gene_body_herv_percent	numeric	100 x herv_bp_in_gene_body / gene_body_bp, rounded to 2 decimals
+lnc	exonic_herv_fraction	numeric	herv_bp_in_exons / exonic_bp, rounded to 4 decimals
+lnc	exonic_herv_percent	numeric	100 x herv_bp_in_exons / exonic_bp, rounded to 2 decimals
+lnc	overlapping_subfamilies	id_text	HERV subfamilies of the overlapping loci
+fun	gene_stable_id	id_text	Ensembl gene identifier with version (GENCODE v48); the same 4,074 genes and row order as Supplemental Table 4
+fun	gene_name	id_text	GENCODE gene name (the Ensembl id when no name is assigned)
+fun	gene_body_herv_percent	numeric	100 x herv_bp_in_gene_body / gene_body_bp, rounded to 2 decimals (as in Supplemental Table 4; intervals such as > 80% are evaluated there on the exact ratio)
+fun	annotation_sources	label_text	sources with functional evidence for the gene: LncRNAWiki (curated entry matched by Ensembl id, symbol or synonym), Literature (at least one PubMed title/abstract sentence naming the gene or an alias), GO (at least one GO annotation); None = no evidence from any source (not annotated)
+fun	functional_categories	label_text	functional categories assigned to the annotated gene (Figure 4B; non-mutually exclusive), from keyword patterns over the literature-derived terms and the LncRNAWiki fields (GO terms not used); blank = no category. Patterns: ceRNA / miRNA sponge (cerna, competing endogenous rna, mirna sponge, microrna sponge, mirna); Proliferation (proliferat, growth); Apoptosis / cell death (apoptosis, apoptotic, cell death); Migration / invasion (migration, invasion, migratory, invasive); Metastasis (metastasis, metastatic); EMT (emt, epithelial-mesenchymal transition); Cell cycle (cell cycle); Differentiation (differentiation, stemness, stem cell); Immune / inflammation (immune, immunity, inflamm, interferon, cytokine); Signaling / pathways (signaling, signal transduction, pathway, akt, erk, mapk, wnt, nf-kb, tgf, pi3k, stat); Cancer-related (cancer, tumor/tumour, oncogen, carcinoma, malignan, metastasis)
+fun	lncrnawiki_mechanism	label_text	functional mechanism(s) curated in LncRNAWiki (portal export of 10 March 2026), repeated items removed; blank = no LncRNAWiki match or no mechanism recorded
+fun	go_terms	label_text	GO term names annotated to the gene (biological process, molecular function and cellular component; Ensembl BioMart per-gene summary); blank = no GO annotation
+fun	n_literature_pmids	integer	number of distinct PubMed records (PMIDs) with at least one sentence matching the gene name or an alias; blank = no literature match
+fun	literature_pmids	id_text	PMIDs of those PubMed records, '; '-separated, ascending
+spc	a_name	id_text	LTR locus identifier: RepeatMasker subfamily, 1-based start and end, and strand of the (merged) LTR interval. Rows are LTR-transcript pairs: an LTR overlapping several transcripts (isoforms or genes) appears once per transcript, so unique LTRs and genes are counted as distinct a_name and gene_id values, as reported in the manuscript
+spc	a_chrom	id_text	chromosome (GRCh38)
+spc	a_start	integer	LTR start, 0-based (BED half-open; the identifier gives the 1-based start)
+spc	a_end	integer	LTR end (BED half-open; equal to the 1-based end)
+spc	a_strand	label_text	LTR strand (opposite to the transcript strand)
+spc	gene_id	id_text	Ensembl gene identifier with version (GENCODE v48)
+spc	gene_name	id_text	GENCODE gene name (the Ensembl id without version when no name is assigned)
+spc	tx_id	id_text	Ensembl transcript identifier with version (GENCODE v48) whose terminal feature the LTR overlaps
+spc	overlap_bp_total	integer	bases of the LTR overlapping the feature (union of the overlapped intervals; >= 1 bp)
+spgo	ID	id_text	GO Biological Process term identifier
+spgo	Description	label_text	GO term name
+spgo	GeneRatio	id_text	foreground genes annotated to the term / GO-annotated foreground genes (1,224) (text ratio)
+spgo	BgRatio	id_text	universe genes annotated to the term / GO-annotated universe genes (17,128) (text ratio)
+spgo	pvalue	p_value	hypergeometric over-representation p-value (clusterProfiler enrichGO)
+spgo	p.adjust	p_value	Benjamini-Hochberg adjusted p-value over the tested terms (gene-set size 10-500)
+spgo	qvalue	p_value	Storey q-value
+spgo	geneID	id_text	foreground genes annotated to the term, "/"-separated
+spgo	Count	integer	number of foreground genes annotated to the term
+spifn	test	label_text	STAT profile (STAT1 or STAT1::STAT2) and interferon-responsive definition: tier1_2_3_4 = tiers 1-4, tier1_2_3 = tiers 1-3, tier1_only = tier 1, synergy_only = synergistic STAT-IRF window (tiers 1-2); tier 1 very high, 2-3 high, 4 medium, 5 low
+spifn	fg_with	integer	Coding_3UTR LTRs classed as interferon-responsive, of the 1,903 present in the LTR motif scans
+spifn	other_with	integer	other scanned LTRs classed as interferon-responsive, of 554,958
+spifn	odds_ratio	numeric	odds ratio, Coding_3UTR LTRs vs other scanned LTRs
+spifn	p_value	p_value	two-sided Fisher's exact test p-value
+spifn	p_adj	p_value	Benjamini-Hochberg adjusted p-value over the 8 tests (identical to the adjustment of the accepted table, which listed the tiers 1-4 comparison twice)
+spu3	comparison	label_text	measure and background: OK proportion or reconstructed_both (Fisher test of the proportion of plausibly reconstructed loci) or confidence (Wilcoxon test of the U3-R-U5 confidence score); vs all = all other LTRs of the catalogue, vs solo = other solo LTRs (SPARCS-like solo LTRs only)
+spu3	test	label_text	statistical test (two-sided)
+spu3	sparcs_TRUE	integer	SPARCS-like LTRs with the property (Fisher rows); number of SPARCS-like LTRs compared (Wilcoxon rows)
+spu3	sparcs_FALSE	integer	SPARCS-like LTRs without the property (Fisher rows; blank for Wilcoxon rows)
+spu3	background_TRUE	integer	background LTRs with the property (Fisher rows); number of background LTRs compared (Wilcoxon rows)
+spu3	background_FALSE	integer	background LTRs without the property (Fisher rows; blank for Wilcoxon rows)
+spu3	sparcs_frac_TRUE	numeric	fraction of SPARCS-like LTRs with the property (Fisher rows)
+spu3	background_frac_TRUE	numeric	fraction of background LTRs with the property (Fisher rows)
+spu3	odds_ratio_sparcs_vs_background	numeric	odds ratio, SPARCS-like vs background (Fisher rows)
+spu3	p_value	p_value	two-sided p-value of the test

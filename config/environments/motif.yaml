@@ -1,0 +1,23 @@
+# env_motif — MEME Suite, used by 02_rbp scanning and null-model stages.
+#
+# Version is PIN_EXACT: FIMO 5.5.9 is recorded in the trailer of every historical
+# fimo.tsv, so it is verifiable rather than assumed.
+name: env_motif
+meme_suite_version: "5.5.9"
+tools:
+  - fasta-get-markov   # order-1 background (stage 2)
+  - fimo               # motif scanning (stages 3, 7, 12)
+# fasta-get-markov has no --version flag. Version is established from the libexec
+# path it resolves to and cross-checked against `fimo --version` in the same prefix.
+version_check:
+  command: "readlink -f $(command -v fasta-get-markov)"
+  expect_contains: "meme-5.5.9"
+  cross_check_command: "fimo --version"
+  cross_check_expect: "5.5.9"
+provision:
+  system: cnag
+  method: existing conda environment (no installation permitted on CNAG)
+  env_path: "/path/to/conda/envs/hervarium-ncrna"
+  note: >
+    Recorded as the site-provided location. Scripts resolve the tool through
+    NCRNA_MEME_BIN or PATH, so this path is configuration, not a runtime literal.

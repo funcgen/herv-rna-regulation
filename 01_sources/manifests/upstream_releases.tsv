@@ -1,0 +1,12 @@
+source_id	record_id	version_doi	canonical_filename	md5	size_bytes	alias	target_system
+SRC03	17662456	10.5281/zenodo.17662456	HERV_internal_sequences_v5.fasta	0a8dc26d38243509983c61b4de3ce5d7	58748239	-	cnag
+SRC04	17662456	10.5281/zenodo.17662456	HERV_internal_v5.bed	dc0c77396229b1616e39a2cb13b294c0	4027751	-	cnag
+SRC05	17662456	10.5281/zenodo.17662456	HERV_domains_v5.bed	f02b8bb89f19a0a2a3ac45efcd900898	2253725	-	cnag
+SRC06	17662456	10.5281/zenodo.17662456	HERV_loci_annotated_domains_v5.tsv	162cba73027d1e4500dc1dbb2671c84a	8057772	-	cnag
+SRC07	19593457	10.5281/zenodo.19593457	HERV_ltr.bed	ef318953ea35e2821431f943c5e20007	43845103	-	cnag
+SRC08	19593457	10.5281/zenodo.19593457	HERV_LTR_U3_R_U5_catalogue.tsv	8c685d0dbb30372cbab5e10167f308fb	100776478	-	cnag
+SRC09	19593457	10.5281/zenodo.19593457	HERV_LTR_fimo_results_tsv.tar.xz	618a92cbf61443373b2d4750552ce42e	596509312	-	cnag
+SRC10	19593457	10.5281/zenodo.19593457	HERV_internal_LTR_map.tsv	a0aa5d8cdcac58bf719d0df4bf07f3fe	5115181	-	cnag
+SRC12a	19661036	10.5281/zenodo.19661036	ATtRACT_db.txt	18c54e3f9cf970d267ed5eb3890e9c12	701558	-	cnag
+SRC12b	19661036	10.5281/zenodo.19661036	pwm.txt	7ff45b94c14d1b992680f561e0a038a4	734112	-	cnag
+SRC13	19661036	10.5281/zenodo.19661036	hervs_internal_and_ltrs.gtf	3570d4709785a2890dd9bd86b8783d91	29954607	-	cnag

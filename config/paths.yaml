@@ -1,0 +1,45 @@
+# Release path configuration.
+# The ONLY place where storage roots are defined. No script may hard-code a root.
+#
+# Scripts resolve their root via config/lib (bash) or config/paths.py (python),
+# which select a system profile from $NCRNA_SYSTEM, falling back to hostname
+# detection. Historical absolute paths appear nowhere in the runtime interface.
+
+systems:
+  local:
+    release_root: "${NCRNA_RELEASE_ROOT:-$HOME/ncRNA}"
+    role: "lightweight analysis, plotting, literature integration, figure and supplement assembly"
+  cnag:
+    release_root: "${NCRNA_RELEASE_ROOT:-/path/to/herv-rna-regulation}"
+    role: "large sequence data, FIMO scans, null model, heavy interval operations"
+
+# Shared external references that are NOT duplicated into the release.
+# Resolved by checksum, not by path: a site may place them anywhere and declare
+# the location here.
+external_references:
+  gencode_v48_gtf:
+    env_var: NCRNA_GENCODE_V48_GTF
+    fallback_relative: "01_sources/external/gencode.v48.primary_assembly.annotation.gtf"
+  grch38_primary_assembly_fa:
+    env_var: NCRNA_GRCH38_FA
+    fallback_relative: "01_sources/external/GRCh38.primary_assembly.genome.fa"
+
+# Module layout, relative to release_root. Modules exist on a system only if a
+# step of that module runs there.
+modules:
+  sources: "01_sources"
+  rbp: "02_rbp"
+  transcript_context: "03_transcript_context"
+  domains_terminal_exons: "04_domains_terminal_exons"
+  lncrna: "05_lncrna"
+  lncrna_function: "06_lncrna_function"
+  sparcs: "07_sparcs"
+  figures_supplement: "08_figures_supplement"
+  validation: "09_validation"
+
+# CNAG SLURM accounting. Every batch and interactive allocation for this project
+# must be charged to the group account; the personal default account has lower
+# priority and jobs submitted under it can sit in PENDING (Priority) indefinitely.
+cnag_slurm:
+  account: "your_slurm_account"
+  partition: "your_partition"

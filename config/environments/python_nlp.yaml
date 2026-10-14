@@ -1,0 +1,36 @@
+# env_python_nlp: spaCy text mining for 06_lncrna_function (effective order 40 and later).
+#
+# STATUS: VALIDATED_RELEASE_ENVIRONMENT (2026-09-29, effective order 40).
+#   With this environment, the UNCHANGED historical F_literature_mining/02_extract_lncrna_functions.py
+#   (sha256 b3316531...), run offline (unshare -rn) on the accepted SRC16 corpus (D031, sha256
+#   f7fa538a...), reproduces the saved historical lncrna_functions_extracted_v5.csv byte for byte
+#   (sha256 768c89e1..., md5 adfff4ae..., 320,503 rows).
+#
+# THIS IS NOT A CLAIM ABOUT WHAT RAN HISTORICALLY. The historical Python, spaCy and model
+# versions were never recorded (ENVIRONMENT_PLAN.tsv: env_python_nlp, UNKNOWN_VERSION,
+# PIN_AND_RECORD_MODEL). The supported claim is: this environment was empirically validated to
+# reproduce the complete historical v5 extraction byte for byte; the historical spaCy and model
+# versions remain unknown.
+name: env_python_nlp
+modules: [06_lncrna_function]
+status: VALIDATED_RELEASE_ENVIRONMENT
+historical_python_version: UNKNOWN
+historical_spacy_version: UNKNOWN
+historical_model_version: UNKNOWN
+validated:
+  python: "3.11.16"
+  spacy: "3.8.11"
+  model: "en_core_web_sm 3.8.0"
+  thinc: "8.3.11"
+  pandas: "2.2.3"
+  numpy: "2.4.6"
+  tqdm: "4.70.1"
+  lock: config/environments/python_nlp.lock.txt
+  conda_env_name: ncrna_o40_spacy_c1
+candidate_selection:
+  rule: "spaCy release current at the historical run date (2026-03-11 17:32) with its only matching model; one fallback (3.7.5 / 3.7.1) reserved"
+  C1: {spacy: "3.8.11 (PyPI 2025-11-17; next release 2026-03-23)", model: "en_core_web_sm 3.8.0 (2024-09-30)", result: BYTE_IDENTICAL}
+  C2: {spacy: "3.7.5", model: "en_core_web_sm 3.7.1", result: NOT_RUN (C1 reproduced v5)}
+provisioning: "network used only to create the environment (conda, PyPI, GitHub model wheel); production and validation run offline"
+execution: "PYTHONNOUSERSITE=1; every order-40 process under unshare -rn; scripts block sockets in-process"
+isolated_from: env_python_genomics   # an NLP model change cannot perturb genomic results
