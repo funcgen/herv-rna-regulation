@@ -120,7 +120,7 @@ If you use this code, please cite:
 Montserrat-Ayuso et al., Genome-wide characterization of HERV-derived RNA regulatory potential in the
 human transcriptome (manuscript in preparation)
 
-and the corresponding Zenodo dataset: https://doi.org/10.5281/zenodo.19661035
+and the corresponding Zenodo dataset: [https://doi.org/10.5281/zenodo.23361077](https://doi.org/10.5281/zenodo.23361077)
 
 Contact: Anna Esteve-Codina, Centre Nacional d'Anàlisi Genòmica (CNAG), Barcelona (anna.esteve@cnag.eu).
 
