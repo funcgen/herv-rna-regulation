@@ -1,9 +1,9 @@
 # herv-rna-regulation
 
 Scripts to reproduce the analyses of **"Genome-wide characterization of HERV-derived RNA regulatory potential in the
-human transcriptome"** (Montserrat-Ayuso T, Pujol A, Esteve-Codina A; manuscript under revision).
+human transcriptome"** (Montserrat-Ayuso T, Pujol A, Esteve-Codina A; manuscript in preparation).
 
-Version 1.0.0 · License: [MIT](LICENSE) · Citation: [CITATION.cff](CITATION.cff)
+Version 1.0.0 · License: [MIT](LICENSE)
 
 The workflow characterises the RNA regulatory potential of 53,176 human endogenous retrovirus (HERV) internal regions
 and 560,594 HERV long terminal repeats (LTRs) in GRCh38 (GENCODE release 48). All results are sequence- and
@@ -115,10 +115,16 @@ runs of each step produced byte-identical outputs.
 
 ## Citation, license and contact
 
-Please cite the article (reference to be added on publication) and this software ([CITATION.cff](CITATION.cff)). The
-code is released under the [MIT License](LICENSE).
+If you use this code, please cite:
+
+Montserrat-Ayuso et al., Genome-wide characterization of HERV-derived RNA regulatory potential in the
+human transcriptome (manuscript in preparation)
+
+and the corresponding Zenodo dataset: https://doi.org/10.5281/zenodo.19661035
 
 Contact: Anna Esteve-Codina, Centre Nacional d'Anàlisi Genòmica (CNAG), Barcelona (anna.esteve@cnag.eu).
+
+This repository is part of HERVarium (https://hervarium.cnag.eu/), an integrative framework for exploring HERV structure and function across multiple regulatory layers.
 
 ### Funding
 
